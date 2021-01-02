@@ -1,0 +1,6 @@
+# model updates... maybe i do want to push this?
+data/model_ts.sdf
+
+# usuals
+log/*
+*/__pycache__/
