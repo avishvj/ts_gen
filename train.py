@@ -235,7 +235,7 @@ with tf.Session(config=config) as sess:
 
                 summary_writer.add_summary(summ, counter)
                 batches_trained += 1
-		counter += 1
+                counter += 1
 
                 print('Training: ', batches_trained, time.time()-batch_start)
                 # if batches_trained % 10 == 0:
