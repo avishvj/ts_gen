@@ -328,7 +328,7 @@ class G2C:
     def clip_gradients(self, gvs):
         """ Clip the gradients """
         with tf.name_scope("Clip"):
-            grads, gvars = list(zip(*gvs)[0]), list(zip(*gvs)[1])
+            grads, gvars = list(zip(*gvs))[0], list(zip(*gvs))[1]
             clipped_grads, global_norm = tf.clip_by_global_norm(grads, 10)
             tf.summary.scalar('gradient_norm', global_norm)
             clipped_gvs = zip(clipped_grads, gvars)
