@@ -10,7 +10,7 @@ Generate 3D transition state geometries with GNNs (Note: python3 pytorch version
 `git clone https://github.com/PattanaikL/ts_gen`
 
 ## Installation on Windows 10
-Bit fiddly because Tensorflow 1.14 can only be installed on Python 3.5+ on Windows 10. So we use Python 3.6 instead.
+Bit fiddly because Tensorflow 1.14 can only be installed on Windows 10 if you have Python 3.5+. So we use Python 3.6 instead.
 * Python (version=3.6)
 * TensorFlow (version=1.14)
 * RDKit (version=2018.09.3)
@@ -21,7 +21,7 @@ Bit fiddly because Tensorflow 1.14 can only be installed on Python 3.5+ on Windo
 4. Update RDKit to version=2018.09.3: `conda install -c rdkit rdkit=2018.09.1` [you may be able to automatically do this in step 2]
 5. Install TensorFlow: `conda install tensorflow==1.14`
 6. Install pymol `conda install -c schrodinger pymol`
-7. Train the model: `python train.py --r_file data/intra_rxns_reactants.sdf --p_file data/intra_rxns_products.sdf --ts_file data/intra_rxns_ts.sdf` -> there should be some niggly code issues to sort out with indentation, zips.
+7. Train the model: `python train.py --r_file data/intra_rxns_reactants.sdf --p_file data/intra_rxns_products.sdf --ts_file data/intra_rxns_ts.sdf` -> there should be some niggly code issues to sort out with indentation, zips. If you get the most recent version of my [avishvj] code, you shouldn't have to worry about this once the conda environment is set up.
 Once this main train command works, turn attention to getting .ipynb notebook to work. 
 8. Install ipykernel: `conda install ipykernel`
 9. Install py3Dmol **using pip**: `pip install py3Dmol`

@@ -3,7 +3,9 @@ import os, time
 import numpy as np
 import tensorflow as tf
 
-import GNN
+# import GNN # ORIGINAL
+# my change below [python imports are stress]
+import model.GNN as GNN
 
 
 class G2C:
