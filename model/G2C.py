@@ -3,10 +3,9 @@ import os, time
 import numpy as np
 import tensorflow as tf
 
-# import GNN # ORIGINAL
-# my change below [python imports are stress]
+# import GNN # AV: ORIGINAL
+# AV: my change below [python imports are stress]
 import model.GNN as GNN
-
 
 class G2C:
     def __init__(self, num_gpus=1, max_size=29, build_backprop=True,
@@ -14,12 +13,14 @@ class G2C:
         """ Initialize a Graph-to-coordinates network """
         # tf.set_random_seed(42)
 
+        # AV: the input features (and size) in graph
         self.dims = {
             "max": max_size,
             "nodes": node_features,
             "edges": edge_features
         }
 
+        # AV: hyperparams: node + edge layers; node + edge hidden size; iterations
         self.hyperparams = {
             "node_layers": layers,
             "node_hidden": hidden_size,
@@ -66,21 +67,22 @@ class G2C:
             edge_hidden=self.hyperparams["edge_hidden"]
         )
         self.tensors = {"V": V, "E": E}
-        mask_D = tf.squeeze(mask_E, 3)
+        mask_D = tf.squeeze(mask_E, 3) # AV: squeeze the edge mask to get the distance mask?
         self.masks = { "V": mask_V, "E": mask_E, "D": mask_D}
-        tf.summary.image("EdgeOut", E[:,:,:,:3])
+        tf.summary.image("EdgeOut", E[:,:,:,:3]) # AV: why using images here?
 
         # Build featurization
         with tf.variable_scope("DistancePredictions"):
+            # AV: edge GNN MLP: takes initial edges and builds mlp
             E = GNN.MLP(
                 E, self.hyperparams["edge_layers"],
                 self.hyperparams["edge_hidden"]
             )
-            self.tensors["embedding"] = tf.reduce_sum(E, axis=[1,2])
+            self.tensors["embedding"] = tf.reduce_sum(E, axis=[1,2]) # compress mlp into embedding
             # Make unc. distance and weight predictions
-            E_out = tf.layers.dense(E, 2, use_bias=True, name="edge_out")
+            E_out = tf.layers.dense(E, 2, use_bias=True, name="edge_out") # AV: ?
             # Symmetrize
-            E_out = E_out + tf.transpose(E_out, [0,2,1,3])  # permuting on i,j
+            E_out = E_out + tf.transpose(E_out, [0,2,1,3])  # permuting on i,j # AV: ?
 
             # Distance matrix prediction
             D_init = tf.get_variable(
@@ -135,6 +137,7 @@ class G2C:
             tf.summary.scalar("LossDistance", self.loss_distance)
         # self.debug_op = tf.add_check_numerics_ops()
 
+    # use Adam optimiser
         with tf.variable_scope("Optimization"):
             opt = tf.train.AdamOptimizer(learning_rate=0.0001)
             gvs = opt.compute_gradients(self.loss_distance)  # gvs is list of (gradient, variable) pairs
@@ -148,6 +151,7 @@ class G2C:
         # self.debug_op = tf.add_check_numerics_ops()
         return
 
+    # convert distance to gram matrix
     def distance_to_gram(self, D, mask):
         """ Convert distance to gram matrix """
         N_f32 = tf.to_float(self.placeholders["sizes"])
