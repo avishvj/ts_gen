@@ -1,15 +1,14 @@
 # ts_gen
 Generate 3D transition state geometries with GNNs (Note: python3 pytorch version and integration into [ARC](https://github.com/ReactionMechanismGenerator/ARC) coming soon!)
 
-## Requirements
+## Installation (for Ubuntu... I'm assuming?)
+Requirements:
 * python (version=2.7)
 * tensorflow (version=1.14)
 * rdkit (version=2018.09.3)
-
-## Installation (for Ubuntu... I'm assuming?)
 `git clone https://github.com/PattanaikL/ts_gen`
 
-## Installation on Windows 10
+## Installation on Windows 10 [AV]
 Bit fiddly because Tensorflow 1.14 can only be installed on Windows 10 if you have Python 3.5+. So we use Python 3.6 instead.
 * Python (version=3.6)
 * TensorFlow (version=1.14)
