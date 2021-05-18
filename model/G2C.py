@@ -95,6 +95,7 @@ class G2C:
                 D, tf.zeros_like(tf.squeeze(self.masks["V"],2))
             )
             self.tensors["D_init"] = D
+            
             tf.summary.image("DistancePred", tf.expand_dims(D,3))
 
             # Weights prediction

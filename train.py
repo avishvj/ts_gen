@@ -14,6 +14,7 @@ from rdkit import Chem, Geometry
 from optparse import OptionParser
 
 
+# parsing options for G2C
 parser = OptionParser()
 parser.add_option("--restore", dest="restore", default=None)
 parser.add_option("--layers", dest="layers", default=2)
@@ -23,6 +24,7 @@ parser.add_option("--epochs", dest="epochs", default=200)
 parser.add_option("--batch_size", dest="batch_size", default=8)
 parser.add_option("--gpu", dest="gpu", default=0)
 
+# parsing for which geometry file
 parser.add_option("--r_file", dest="r_file", default=None)
 parser.add_option("--p_file", dest="p_file", default=None)
 parser.add_option("--ts_file", dest="ts_file", default=None)
