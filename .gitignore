@@ -5,3 +5,7 @@ data/model_ts.sdf
 log/*
 */__pycache__/*
 __pycache__/
+
+# aml stuff
+.ipynb_aml_checkpoints/*
+*.amltmp
