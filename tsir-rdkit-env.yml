@@ -119,4 +119,5 @@ dependencies:
     - py3dmol==0.9.1
     - tqdm==4.60.0
     # - rdkit==2009.Q1-1
+    # - azureml-mlflow
 prefix: C:\Users\Avish\miniconda3\envs\tsir-rdkit-env1.1

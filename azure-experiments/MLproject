@@ -1,0 +1,12 @@
+name: initial-experiment
+
+conda_env: initial-experiment.yaml
+
+entry_points:
+    main:
+        parameters:
+            layers: {type: int, default: 2}
+            hidden_size: {type: int, default: 128}
+            iterations: {type: int, default: 3}
+            batch_size: {type: int, default: 8}
+        command: "python train.py --r_file ../data/intra_rxns_reactants.sdf --p_file ../data/intra_rxns_products.sdf --ts_file ../data/intra_rxns_ts.sdf --layers {layers} --hidden_size {hidden_size} --iterations {iterations} --batch_size {batch_size}"
