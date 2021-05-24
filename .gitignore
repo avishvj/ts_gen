@@ -7,5 +7,5 @@ log/*
 __pycache__/
 
 # aml stuff
-.ipynb_aml_checkpoints/*
+*.ipynb_aml_checkpoints/*
 *.amltmp
