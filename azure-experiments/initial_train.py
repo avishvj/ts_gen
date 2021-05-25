@@ -9,6 +9,7 @@ from optparse import OptionParser
 # mlflow
 import mlflow
 import mlflow.sklearn
+import mlflow.tensorflow
 
 # syspath for current directory
 sys.path.insert(0, "../model/")
@@ -37,43 +38,45 @@ def prepare_batch(batch_mols, max_size, elements):
         sizes = np.zeros(size, dtype = np.int32)
         coordinates = np.zeros((size, max_size, 3), dtype = np.float32)
 
-        # build atom features
+        # build molecule features for each reaction
         for bx in range(size):
-        reactant, ts, product = batch_mols[bx]
-        num_atoms = reactant.GetNumAtoms()
-        sizes[bx] = int(num_atoms)
 
-        # topological distances matrix
-        D = (Chem.GetDistanceMatrix(reactant) + Chem.GetDistanceMatrix(product)) / 2
-        D[D > MAX_NUM_BONDS] = MAX_NUM_BONDS
+                # get r, ts, p for reaction
+                reactant, ts, product = batch_mols[bx]
+                num_atoms = reactant.GetNumAtoms()
+                sizes[bx] = int(num_atoms)
 
-        # 3D rbf matrix
-        D_3D_rbf = np.exp(-((Chem.Get3DDistanceMatrix(reactant) + Chem.Get3DDistanceMatrix(product)) / 2)) 
+                # topological distances matrix
+                D = (Chem.GetDistanceMatrix(reactant) + Chem.GetDistanceMatrix(product)) / 2
+                D[D > MAX_NUM_BONDS] = MAX_NUM_BONDS
 
-        for i in range(num_atoms):
+                # 3D rbf matrix
+                D_3D_rbf = np.exp(-((Chem.Get3DDistanceMatrix(reactant) + Chem.Get3DDistanceMatrix(product)) / 2)) 
 
-                # edge features (stays bonded and bond aromatic?, stays bonded?, 3D rbf distance)
-                for j in range(num_atoms):
-                        # if stays bonded
-                        if D[i][j] == 1.: 
-                                # if aromatic bond
-                                if reactant.GetBondBetweenAtoms(i, j).GetIsAromatic():
-                                        E[bx, i, j, 0] = 1.
-                                E[bx, i, j, 1] = 1
-                        # add 3D rbf dist
-                        E[bx, i, j, 2] = D_3D_rbf[i][j]
+                for i in range(num_atoms):
 
-                # node features
-                atom = reactant.GetAtomWithIdx(i)
-                e_ix = elements.index(atom.GetSymbol())
-                V[bx, i, e_ix] = 1.
-                V[bx, i, num_elements] = atom.GetAtomicNum() / 10.
+                        # edge features (stays bonded and bond aromatic?, stays bonded?, 3D rbf distance)
+                        for j in range(num_atoms):
+                                # if stays bonded
+                                if D[i][j] == 1.: 
+                                        # if aromatic bond
+                                        if reactant.GetBondBetweenAtoms(i, j).GetIsAromatic():
+                                                E[bx, i, j, 0] = 1.
+                                        E[bx, i, j, 1] = 1
+                                # add 3D rbf dist
+                                E[bx, i, j, 2] = D_3D_rbf[i][j]
 
-                # recover coordinates
-                pos = ts.GetConformer().GetAtomPosition(i)
-                np.asarray([pos.x, pos.y, pos.z])
-                coordinates[bx, i, :] = np.asarray([pos.x, pos.y, pos.z])
-        
+                        # node features
+                        atom = reactant.GetAtomWithIdx(i)
+                        e_ix = elements.index(atom.GetSymbol())
+                        V[bx, i, e_ix] = 1.
+                        V[bx, i, num_elements] = atom.GetAtomicNum() / 10.
+
+                        # recover coordinates
+                        pos = ts.GetConformer().GetAtomPosition(i)
+                        np.asarray([pos.x, pos.y, pos.z])
+                        coordinates[bx, i, :] = np.asarray([pos.x, pos.y, pos.z])
+                
         batch_dict = {"nodes": tf.constant(V), "edges": tf.constant(E), "sizes": tf.constant(sizes), "coordinates": tf.constant(coordinates)}
 
         return batch_dict
@@ -85,7 +88,7 @@ if __name__ == "__main__":
         # read in args
         parser = OptionParser()
         
-        # have relevant parsing options
+        # have included relevant parsing options
         parser.add_option("--restore", dest="restore", default=None)
         parser.add_option("--layers", dest="layers", default=2)
         parser.add_option("--hidden_size", dest="hidden_size", default=128)
@@ -123,14 +126,21 @@ if __name__ == "__main__":
         # dataset dimensions
         elements = "HCNO"
         num_elements = len(elements)
-        max_size = max([x.GetNumAtoms() for x,y,z in data]) # TODO? max for xyz
+        max_size = max([x.GetNumAtoms() for x,y,z in train_data]) # TODO? max for xyz
 
         num_train = len(train_data)
-        num_valid = int(round(num_data / 8))
+        num_valid = int(round(num_train / 8))
 
         # train:val splits
-        data_train = train_data[ :num_train - num_valid]
-        data_val = train_data[num_train - num_valid: ]
+        #data_train = train_data[ :num_train - num_valid]
+        #data_valid = train_data[num_train - num_valid: ]
+        data_train = train_data[ :200]
+        data_valid = train_data[200: 250]
+
+        # build base path forexperiment
+        base_folder = time.strftime("log/%y%b%d_%I%M%p/", time.localtime())
+        if not os.path.exists(base_folder):
+                os.makedirs(base_folder)
 
         # prepare train:val batches and iterators
         with tf.variable_scope("Dataset"):
@@ -139,8 +149,8 @@ if __name__ == "__main__":
                 shapes = [[BATCH_SIZE, max_size, num_elements + 1], [BATCH_SIZE, max_size, max_size, 3], [BATCH_SIZE], [BATCH_SIZE, max_size, 3]]
                 number_of_threads_train_n = 3
 
-                ds_train = tf.data.Dataset.from_tensor_slices(prepare_batch(data_train)).cache().batch(BATCH_SIZE).prefetch(buffer_size = tf.data.experimental.AUTOTUNE)
-                ds_valid = tf.data.Dataset.from_tensor_slices(prepare_batch(data_valid)).cache().batch(BATCH_SIZE).prefetch(buffer_size = tf.data.experimental.AUTOTUNE)
+                ds_train = tf.data.Dataset.from_tensor_slices(prepare_batch(data_train, max_size, elements)).cache().batch(BATCH_SIZE).prefetch(buffer_size = tf.data.experimental.AUTOTUNE)
+                ds_valid = tf.data.Dataset.from_tensor_slices(prepare_batch(data_valid, max_size, elements)).cache().batch(BATCH_SIZE).prefetch(buffer_size = tf.data.experimental.AUTOTUNE)
 
                 iterator = tf.data.Iterator.from_structure(ds_train.output_types, ds_train.output_shapes)
                 next_element = iterator.get_next()
@@ -148,20 +158,9 @@ if __name__ == "__main__":
                 training_init_op = iterator.make_initializer(ds_train)
                 validation_init_op = iterator.make_initializer(ds_valid)
 
-        # mlflow: run model, fit train data, predict on val and get metrics out
-        # also get some mlflow log metrics  
-        # build data, then mlflow
+        # build data, then mlflow: build model, start session, fit train data, predict on val, get metrics
         # for plots: D_init, W, GNN embeddings 
         # for model training/plots: best_model.ckpt, last_model.ckpt, HP values
-        # for 
-        # 
-
-        # tensorflow inside mlflow scope?
-        #       - dataset
-        #       - build model
-        #       - launch session and do
-        #       - print and/or save metrics + best models
-        #       - save D_init, W, GNN embeddings
         with mlflow.start_run():
 
                 # build model
@@ -187,19 +186,22 @@ if __name__ == "__main__":
                         init = tf.global_variables_initializer()
                         sess.run(init)
 
-                        # build batch summaries
-                        #summary_op = tf.summary.merge_all()
-                        #summary_writer = tf.summary.FileWriter(base_folder, sess.graph)
-                        # how to use mlflow here instead?
+                        # want to build batch summaries using mlflow instead of TB?
+                        summary_op = tf.summary.merge_all()
+                        summary_writer = tf.summary.FileWriter(base_folder, sess.graph)
 
                         # variable saving
                         saver = tf.train.Saver()
                         if args.restore is not None:
                                 saver.restore(sess, args.restore)
+                        
+                        print("###########################")
                         print("TensorFlow set up complete.")
+                        print("###########################")
 
                         counter = 0
                         for epoch in range(EPOCHS):
+                        
                                 sess.run(training_init_op)
                                 batches_trained = 0
 
@@ -207,7 +209,7 @@ if __name__ == "__main__":
                                         while True:
                                                 _, _, summ = sess.run(
                                                 [dgnn.train_op, dgnn.debug_op, summary_op])
-                                                # summary_writer.add_summary(summ, counter) MLflow here!
+                                                summary_writer.add_summary(summ, counter) # mlflow here?
                                                 batches_trained += 1
                                                 counter += 1
                                                 print("Batches trained: ", batches_trained)
@@ -237,5 +239,21 @@ if __name__ == "__main__":
                                 if val_loss < best_val_loss:
                                         best_val_loss = val_loss
                                         save_path = saver.save(sess, base_folder + "best_model.ckpt")
+                                
+                                print("Batch validation Loss: {}".format(val_loss))
+                        
+                       
+                        # mlflow.log_param()?
+                        # mlflow.log_metric()
+                        # mlflow: 
 
-                                print("Validation Loss: {}".format(val_loss))
+                        # !!! mlflow tensorflow autologging only compatible with tf version <= 1.15.4 so may need to update.
+
+
+# navigate to azure-experiments folder and:
+#       - default params: mlflow run .
+#       - with params: mlflow run . -P epochs 30
+#       - skip conda creation: mlflow run . --no-conda
+#       - once code finished, can view run's metrics by running: mlflow ui
+
+

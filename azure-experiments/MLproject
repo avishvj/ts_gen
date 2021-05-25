@@ -10,5 +10,5 @@ entry_points:
             iterations: {type: float, default: 3}
             batch_size: {type: float, default: 8}
             epochs: {type: float, default: 20}
-        command: "python initial_train.py --layers {layers} --hidden_size {hidden_size} --iterations {iterations} --batch_size {batch_size} --epochs {epochs}"
+        command: "python initial_train.py --layers={layers} --hidden_size={hidden_size} --iterations={iterations} --batch_size={batch_size} --epochs={epochs}"
 
