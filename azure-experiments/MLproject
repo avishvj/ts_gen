@@ -5,8 +5,10 @@ conda_env: initial-experiment.yaml
 entry_points:
     main:
         parameters:
-            layers: {type: int, default: 2}
-            hidden_size: {type: int, default: 128}
-            iterations: {type: int, default: 3}
-            batch_size: {type: int, default: 8}
-        command: "python train.py --r_file ../data/intra_rxns_reactants.sdf --p_file ../data/intra_rxns_products.sdf --ts_file ../data/intra_rxns_ts.sdf --layers {layers} --hidden_size {hidden_size} --iterations {iterations} --batch_size {batch_size}"
+            layers: {type: floar, default: 2}
+            hidden_size: {type: float, default: 128}
+            iterations: {type: float, default: 3}
+            batch_size: {type: float, default: 8}
+            epochs: {type: float, default: 20}
+        command: "python initial_train.py --layers {layers} --hidden_size {hidden_size} --iterations {iterations} --batch_size {batch_size} --epochs {epochs}"
+
