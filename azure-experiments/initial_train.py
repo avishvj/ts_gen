@@ -1,10 +1,15 @@
 from __future__ import print_function
 import os, sys, time, random
-import tensorflow as tf
-from tensorflow.python.client import timeline
 import numpy as np
 from rdkit import Chem, Geometry
 from optparse import OptionParser
+
+# tensorflow
+import tensorflow as tf
+from tensorflow.python.client import timeline
+
+# azureml
+from azureml.core import Workspace
 
 # mlflow
 import mlflow
@@ -134,8 +139,8 @@ if __name__ == "__main__":
         # train:val splits
         #data_train = train_data[ :num_train - num_valid]
         #data_valid = train_data[num_train - num_valid: ]
-        data_train = train_data[ :200]
-        data_valid = train_data[200: 250]
+        data_train = train_data[ :50]
+        data_valid = train_data[50: 60]
 
         # build base path forexperiment
         base_folder = time.strftime("log/%y%b%d_%I%M%p/", time.localtime())
@@ -161,8 +166,9 @@ if __name__ == "__main__":
         # build data, then mlflow: build model, start session, fit train data, predict on val, get metrics
         # for plots: D_init, W, GNN embeddings 
         # for model training/plots: best_model.ckpt, last_model.ckpt, HP values
+        
         with mlflow.start_run():
-
+        
                 # build model
                 dgnn = G2C(max_size=max_size, node_features=num_elements + 1, edge_features=3, layers=layers, hidden_size=hidden_size, iterations=iterations, input_data=next_element)
 
@@ -240,9 +246,19 @@ if __name__ == "__main__":
                                         best_val_loss = val_loss
                                         save_path = saver.save(sess, base_folder + "best_model.ckpt")
                                 
+                                # save D_init
+                                
+                                dinit_value = sess.run(dgnn.tensors["D_init"])
+                                print(dinit_value) 
+
+                                # np.save("x.npy", x_value, allow_pickle=False)
+                                
+                                
+                                #np.save(base_folder + 'Dinit' + str(batches_validated) + ".npy", dgnn.tensors["D_init"])
+
                                 print("Batch validation Loss: {}".format(val_loss))
                         
-                       
+                        mlflow.end_run()
                         # mlflow.log_param()?
                         # mlflow.log_metric()
                         # mlflow: 

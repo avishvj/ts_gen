@@ -4,9 +4,9 @@ import numpy as np
 import tensorflow as tf
 
 # import GNN # AV: ORIGINAL
-import GNN
+#import GNN
 # AV: my change below [python imports are stress]
-# import model.GNN as GNN
+import model.GNN as GNN
 
 class G2C:
     def __init__(self, num_gpus=1, max_size=29, build_backprop=True,
