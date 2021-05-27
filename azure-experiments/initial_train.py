@@ -248,8 +248,8 @@ if __name__ == "__main__":
                                 
                                 # save D_init
                                 
-                                dinit_value = sess.run(dgnn.tensors["D_init"])
-                                print(dinit_value) 
+                                # dinit_value = sess.run(dgnn.tensors["D_init"])
+                                # print(dinit_value) 
 
                                 # np.save("x.npy", x_value, allow_pickle=False)
                                 
