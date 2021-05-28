@@ -142,7 +142,7 @@ if __name__ == "__main__":
         data_train = train_data[ :50]
         data_valid = train_data[50: 60]
 
-        # build base path forexperiment
+        # build base path for experiment
         base_folder = time.strftime("log/%y%b%d_%I%M%p/", time.localtime())
         if not os.path.exists(base_folder):
                 os.makedirs(base_folder)
@@ -200,6 +200,13 @@ if __name__ == "__main__":
                         saver = tf.train.Saver()
                         if args.restore is not None:
                                 saver.restore(sess, args.restore)
+
+                        # create numpy arrays to populate
+                        num_train = len(data_train)
+                        D_init_train = np.empty([num_train, max_size, max_size])
+
+                        #new_W = np.empty([num_train, MAX_SIZE, MAX_SIZE])
+                        #new_embedding = np.empty([num_train, 256])
                         
                         print("###########################")
                         print("TensorFlow set up complete.")
@@ -216,9 +223,15 @@ if __name__ == "__main__":
                                                 _, _, summ = sess.run(
                                                 [dgnn.train_op, dgnn.debug_op, summary_op])
                                                 summary_writer.add_summary(summ, counter) # mlflow here?
+                                                
+                                                # trying to save D_init during run
+                                                D_init_train[batches_trained * BATCH_SIZE: (batches_trained + 1) * BATCH_SIZE, :, :] = sess.run([dgnn.tensors["D_init"]])[0]
+                                                
                                                 batches_trained += 1
                                                 counter += 1
+
                                                 print("Batches trained: ", batches_trained)
+
                                 except tf.errors.OutOfRangeError as e:
                                         pass
                                 sess.run(validation_init_op)
@@ -247,7 +260,7 @@ if __name__ == "__main__":
                                         save_path = saver.save(sess, base_folder + "best_model.ckpt")
                                 
                                 # save D_init
-                                
+                                np.save(os.path.join(base_folder, 'D_init'), D_init_train)
                                 # dinit_value = sess.run(dgnn.tensors["D_init"])
                                 # print(dinit_value) 
 
