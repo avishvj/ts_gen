@@ -1,12 +1,4 @@
 # ts_gen
-Generate 3D transition state geometries with GNNs (Note: python3 pytorch version and integration into [ARC](https://github.com/ReactionMechanismGenerator/ARC) coming soon!)
-
-## Installation (for Ubuntu... I'm assuming?)
-Requirements:
-* python (version=2.7)
-* tensorflow (version=1.14)
-* rdkit (version=2018.09.3)
-`git clone https://github.com/PattanaikL/ts_gen`
 
 ## Installation on Windows 10 [AV]
 Bit fiddly because Tensorflow 1.14 can only be installed on Windows 10 if you have Python 3.5+. So we use Python 3.6 instead.
@@ -24,6 +16,20 @@ Bit fiddly because Tensorflow 1.14 can only be installed on Windows 10 if you ha
 Once this main train command works, turn attention to getting .ipynb notebook to work. 
 8. Install ipykernel: `conda install ipykernel`
 9. Install py3Dmol **using pip**: `pip install py3Dmol`
+
+## Some notes for me
+- Sign out of Azure from the VSCode command palette.
+
+
+# From original
+Generate 3D transition state geometries with GNNs (Note: python3 pytorch version and integration into [ARC](https://github.com/ReactionMechanismGenerator/ARC) coming soon!)
+
+## Installation (for Ubuntu... I'm assuming?)
+Requirements:
+* python (version=2.7)
+* tensorflow (version=1.14)
+* rdkit (version=2018.09.3)
+`git clone https://github.com/PattanaikL/ts_gen`
 
 ## Usage
 To train the model, call the `train.py` script with the following parameters defined. If training with your own data, ensure data is in sdf format and molecules between reactants, products, and transition states are all aligned.

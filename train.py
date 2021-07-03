@@ -200,7 +200,7 @@ config.gpu_options.allow_growth = True
 with tf.Session(config=config) as sess:
 
     # Initialization
-    print("Initializing")
+    print("==================== Initializing ====================")
     start = time.time()
     init = tf.global_variables_initializer()
     sess.run(init)
@@ -209,7 +209,7 @@ with tf.Session(config=config) as sess:
 
     # Build batch summaries and TensorBoard writer
     summary_op = tf.summary.merge_all()
-    print("Setting up saver")
+    print("==================== Setting up saver ====================")
     start = time.time()
     summary_writer = tf.summary.FileWriter(base_folder, sess.graph)
 
@@ -218,7 +218,7 @@ with tf.Session(config=config) as sess:
     if args.restore is not None:
         saver.restore(sess, args.restore)
     elapsed = time.time() - start
-    print(" set up in " + str(elapsed) + " s\n")
+    print("==================== Set up in " + str(elapsed) + " s\n")
 
     counter = 0
 
@@ -238,13 +238,20 @@ with tf.Session(config=config) as sess:
                 summary_writer.add_summary(summ, counter)
                 batches_trained += 1
                 counter += 1
-
-                print('Training: ', batches_trained, time.time()-batch_start)
+                
+                # AV
+                if batches_trained % 20 == 0:
+                    print(f"Batches trained: {batches_trained}, time taken: {time.time() - batch_start : .4d}")
+                
+                # print('Training: ', batches_trained, time.time()-batch_start)
                 # if batches_trained % 10 == 0:
                 #     print(batches_trained)
 
         except tf.errors.OutOfRangeError as e:
             pass
+
+        print("done training!")
+
         sess.run(validation_init_op)
 
         X = np.empty([len(data_valid), max_size, 3])
