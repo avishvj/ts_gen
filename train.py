@@ -241,7 +241,7 @@ with tf.Session(config=config) as sess:
                 
                 # AV
                 if batches_trained % 20 == 0:
-                    print(f"Batches trained: {batches_trained}, time taken: {time.time() - batch_start : .4d}")
+                    print(f"Batches trained: {batches_trained}, time taken: {time.time() - batch_start}")
                 
                 # print('Training: ', batches_trained, time.time()-batch_start)
                 # if batches_trained % 10 == 0:
@@ -250,7 +250,7 @@ with tf.Session(config=config) as sess:
         except tf.errors.OutOfRangeError as e:
             pass
 
-        print("done training!")
+        print(f"Epoch training complete: {time.time() - epoch_start}")
 
         sess.run(validation_init_op)
 
@@ -270,10 +270,14 @@ with tf.Session(config=config) as sess:
                     [dgnn.debug_op, dgnn.tensors["X"], dgnn.loss_distance_all, dgnn.masks["D"]])
 
                 batches_validated += 1
-                print('Validation: ', batches_validated, time.time()-batch_start)
+
+                if batches_validated % 10 == 0:
+                    print('Validation: ', batches_validated, time.time()-batch_start)
 
         except tf.errors.OutOfRangeError as e:
             pass
+
+        print(f"Epoch validation complete: {time.time() - epoch_start}")
 
         other_calcs_start = time.time()
         losses = [np.sum(valid_loss_all[i] * D_mask[i]) / np.sum(D_mask[i]) for i in range(X.shape[0])]
