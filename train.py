@@ -284,6 +284,7 @@ with tf.Session(config=config) as sess:
         val_loss = np.mean(np.asarray(losses))
 
         # Make copy of molecule (early checks)
+        """
         if epoch < 5:
             bx = 0
             mol_target = data_valid[bx][1]  # transition state geom
@@ -296,6 +297,7 @@ with tf.Session(config=config) as sess:
 
             render_pymol(mol, base_folder + "step{}_model.png".format(epoch), width=600, height=400)
             render_pymol(mol_target, base_folder + "step{}_target.png".format(epoch), width=600, height=400)
+        """
 
         # save_path = saver.save(sess, base_folder + "step{}_model.ckpt".format(epoch))
         if val_loss < best_val_loss:
@@ -314,12 +316,13 @@ print("Layers: {}".format(layers))
 print("Hidden size: {}".format(hidden_size))
 print("Iterations: {}".format(iterations))
 
+"""
 # Save test data
 test_ts_file = base_folder + 'test_ts.sdf'
 test_reactant_file = base_folder + 'test_reactants.sdf'
 test_products_file = base_folder + 'test_products.sdf'
 
-test_ts_writer = Chem.SDWriter(test_ts_file)
+# test_ts_writer = Chem.SDWriter(test_ts_file)
 test_reactant_writer = Chem.SDWriter(test_reactant_file)
 test_product_writer = Chem.SDWriter(test_products_file)
 
@@ -327,3 +330,4 @@ for i in range(len(data_test)):
     test_reactant_writer.write(data_test[i][0])
     test_ts_writer.write(data_test[i][1])
     test_product_writer.write(data_test[i][2])
+"""

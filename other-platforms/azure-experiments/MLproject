@@ -1,0 +1,14 @@
+name: initial-experiment
+
+conda_env: initial-experiment.yaml
+
+entry_points:
+    main:
+        parameters:
+            layers: {type: floar, default: 2}
+            hidden_size: {type: float, default: 128}
+            iterations: {type: float, default: 3}
+            batch_size: {type: float, default: 8}
+            epochs: {type: float, default: 20}
+        command: "python initial_train.py --layers={layers} --hidden_size={hidden_size} --iterations={iterations} --batch_size={batch_size} --epochs={epochs}"
+
