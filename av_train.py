@@ -211,7 +211,7 @@ with tf.Session(config=config) as sess:
 
         try:
             while True:
-                batch_start = time.time()
+                # batch_start = time.time()
 
                 _, _, summ = sess.run(
                     [dgnn.train_op, dgnn.debug_op, summary_op])
@@ -221,8 +221,8 @@ with tf.Session(config=config) as sess:
                 counter += 1
                 
                 # AV
-                if batches_trained % 20 == 0:
-                    print(f"Batches trained: {batches_trained}, time taken: {time.time() - batch_start}")
+                if batches_trained % 200 == 0:
+                    print(f"Batches trained: {batches_trained}, time taken: {time.time() - epoch_start}")
 
         except tf.errors.OutOfRangeError as e:
             pass
